@@ -1,0 +1,108 @@
+name: orionbelt-evidence
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: orionbelt-evidence
+  cancel-in-progress: false
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: evidence
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      EVIDENCE_BUCKET: ${{ vars.EVIDENCE_BUCKET }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_wrapper: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+
+      # Installed before any credentials exist, at a release tag only.
+      - name: Install orionbelt-evidence
+        env:
+          ORIONBELT_EVIDENCE_VERSION: ${{ vars.ORIONBELT_EVIDENCE_VERSION }}
+        run: |
+          set -eu
+          case "$ORIONBELT_EVIDENCE_VERSION" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "ORIONBELT_EVIDENCE_VERSION must be a release tag such as v1.2.3" >&2; exit 1 ;;
+          esac
+          go install "github.com/orion-belt-dev/terraform-provider-orionbelt/cmd/orionbelt-evidence@${ORIONBELT_EVIDENCE_VERSION}"
+
+      # This repo's own role for reading state and refreshing resources, not the evidence role.
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.TERRAFORM_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform plan
+        env:
+          ORIONBELT_URL: ${{ vars.ORIONBELT_URL }}
+          ORIONBELT_API_KEY: ${{ secrets.ORIONBELT_API_KEY }}
+        run: |
+          set +e
+          terraform plan -input=false -lock=false -detailed-exitcode -out=tfplan
+          code=$?
+          if [ "$code" -ne 0 ] && [ "$code" -ne 2 ]; then
+            exit "$code"
+          fi
+
+      - name: Build evidence
+        run: |
+          set -eu
+          terraform show -json tfplan > plan.json
+          env -i PATH="$PATH" orionbelt-evidence \
+            -plan plan.json \
+            -repository "$GITHUB_REPOSITORY" \
+            -commit "$GITHUB_SHA" \
+            -run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > evidence.json
+
+      - name: Remove plan files
+        if: always()
+        run: rm -f plan.json tfplan
+
+      - id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: evidence.json
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.EVIDENCE_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Upload evidence
+        env:
+          BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+        run: |
+          set -eu
+          prefix="s3://$EVIDENCE_BUCKET/evidence/$(date -u +%Y/%m/%d)/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          aws s3 cp evidence.json "$prefix/evidence.json"
+          aws s3 cp "$BUNDLE_PATH" "$prefix/evidence.sigstore.json"
+
+      - name: Fail if not compliant
+        run: jq -e '.compliant' evidence.json

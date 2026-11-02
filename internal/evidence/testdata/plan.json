@@ -1,0 +1,707 @@
+{
+ "format_version": "1.2",
+ "terraform_version": "1.15.9",
+ "planned_values": {
+  "root_module": {
+   "resources": [
+    {
+     "address": "orionbelt_agent.web",
+     "mode": "managed",
+     "type": "orionbelt_agent",
+     "name": "web",
+     "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+     "schema_version": 0,
+     "values": {
+      "agent_yaml": "server:\n    host: localhost\n    port: 2222\nagent:\n    name: ev-web\nauth:\n    key_file: /etc/orion-belt/agent_key\n    known_hosts: /etc/orion-belt/known_hosts\n    strict_host_key_checking: ask\n",
+      "archive_on_destroy": true,
+      "cloud_init": null,
+      "gateway_host": "localhost",
+      "gateway_host_key": null,
+      "gateway_port": 2222,
+      "host_ca_public_key": "",
+      "host_certificate": "",
+      "hostname": "10.0.0.9",
+      "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+      "install_version": null,
+      "name": "ev-web",
+      "port": 22,
+      "private_key_command": null,
+      "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICPd9NCnG1LmTq/W+jyDIU9FuxYUZEFjuufGvz56rwd0 ev",
+      "tags": null
+     },
+     "sensitive_values": {
+      "cloud_init": true,
+      "private_key_command": true
+     }
+    },
+    {
+     "address": "orionbelt_machine_access.web",
+     "mode": "managed",
+     "type": "orionbelt_machine_access",
+     "name": "web",
+     "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+     "schema_version": 0,
+     "values": {
+      "grant": [
+       {
+        "access_type": "ssh",
+        "expires_at": "2026-12-01T00:00:00Z",
+        "remote_users": [
+         "deploy"
+        ],
+        "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+       }
+      ],
+      "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+      "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+     },
+     "sensitive_values": {
+      "grant": [
+       {
+        "remote_users": [
+         false
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "address": "orionbelt_user.engineer",
+     "mode": "managed",
+     "type": "orionbelt_user",
+     "name": "engineer",
+     "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+     "schema_version": 0,
+     "values": {
+      "email": "engineer@example.com",
+      "id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+      "mfa_enabled": false,
+      "public_key": null,
+      "role": "user",
+      "username": "ev-engineer"
+     },
+     "sensitive_values": {}
+    }
+   ]
+  }
+ },
+ "resource_drift": [
+  {
+   "address": "orionbelt_machine_access.web",
+   "mode": "managed",
+   "type": "orionbelt_machine_access",
+   "name": "web",
+   "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+   "change": {
+    "actions": [
+     "update"
+    ],
+    "before": {
+     "grant": [
+      {
+       "access_type": "ssh",
+       "expires_at": "2026-12-01T00:00:00Z",
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      }
+     ],
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+    },
+    "after": {
+     "grant": [
+      {
+       "access_type": "ssh",
+       "expires_at": "2026-12-01T00:00:00Z",
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      },
+      {
+       "access_type": "scp",
+       "expires_at": null,
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      }
+     ],
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+    },
+    "after_unknown": {},
+    "before_sensitive": {
+     "grant": [
+      {
+       "remote_users": [
+        false
+       ]
+      }
+     ]
+    },
+    "after_sensitive": {
+     "grant": [
+      {
+       "remote_users": [
+        false
+       ]
+      },
+      {
+       "remote_users": [
+        false
+       ]
+      }
+     ]
+    }
+   }
+  }
+ ],
+ "resource_changes": [
+  {
+   "address": "orionbelt_agent.web",
+   "mode": "managed",
+   "type": "orionbelt_agent",
+   "name": "web",
+   "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "before": {
+     "agent_yaml": "server:\n    host: localhost\n    port: 2222\nagent:\n    name: ev-web\nauth:\n    key_file: /etc/orion-belt/agent_key\n    known_hosts: /etc/orion-belt/known_hosts\n    strict_host_key_checking: ask\n",
+     "archive_on_destroy": true,
+     "cloud_init": null,
+     "gateway_host": "localhost",
+     "gateway_host_key": null,
+     "gateway_port": 2222,
+     "host_ca_public_key": "",
+     "host_certificate": "",
+     "hostname": "10.0.0.9",
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "install_version": null,
+     "name": "ev-web",
+     "port": 22,
+     "private_key_command": null,
+     "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICPd9NCnG1LmTq/W+jyDIU9FuxYUZEFjuufGvz56rwd0 ev",
+     "tags": null
+    },
+    "after": {
+     "agent_yaml": "server:\n    host: localhost\n    port: 2222\nagent:\n    name: ev-web\nauth:\n    key_file: /etc/orion-belt/agent_key\n    known_hosts: /etc/orion-belt/known_hosts\n    strict_host_key_checking: ask\n",
+     "archive_on_destroy": true,
+     "cloud_init": null,
+     "gateway_host": "localhost",
+     "gateway_host_key": null,
+     "gateway_port": 2222,
+     "host_ca_public_key": "",
+     "host_certificate": "",
+     "hostname": "10.0.0.9",
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "install_version": null,
+     "name": "ev-web",
+     "port": 22,
+     "private_key_command": null,
+     "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICPd9NCnG1LmTq/W+jyDIU9FuxYUZEFjuufGvz56rwd0 ev",
+     "tags": null
+    },
+    "after_unknown": {},
+    "before_sensitive": {
+     "cloud_init": true,
+     "private_key_command": true
+    },
+    "after_sensitive": {
+     "cloud_init": true,
+     "private_key_command": true
+    }
+   }
+  },
+  {
+   "address": "orionbelt_machine_access.web",
+   "mode": "managed",
+   "type": "orionbelt_machine_access",
+   "name": "web",
+   "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+   "change": {
+    "actions": [
+     "update"
+    ],
+    "before": {
+     "grant": [
+      {
+       "access_type": "ssh",
+       "expires_at": "2026-12-01T00:00:00Z",
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      },
+      {
+       "access_type": "scp",
+       "expires_at": null,
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      }
+     ],
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+    },
+    "after": {
+     "grant": [
+      {
+       "access_type": "ssh",
+       "expires_at": "2026-12-01T00:00:00Z",
+       "remote_users": [
+        "deploy"
+       ],
+       "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+      }
+     ],
+     "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+     "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+    },
+    "after_unknown": {},
+    "before_sensitive": {
+     "grant": [
+      {
+       "remote_users": [
+        false
+       ]
+      },
+      {
+       "remote_users": [
+        false
+       ]
+      }
+     ]
+    },
+    "after_sensitive": {
+     "grant": [
+      {
+       "remote_users": [
+        false
+       ]
+      }
+     ]
+    }
+   }
+  },
+  {
+   "address": "orionbelt_user.engineer",
+   "mode": "managed",
+   "type": "orionbelt_user",
+   "name": "engineer",
+   "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+   "change": {
+    "actions": [
+     "no-op"
+    ],
+    "before": {
+     "email": "engineer@example.com",
+     "id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+     "mfa_enabled": false,
+     "public_key": null,
+     "role": "user",
+     "username": "ev-engineer"
+    },
+    "after": {
+     "email": "engineer@example.com",
+     "id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+     "mfa_enabled": false,
+     "public_key": null,
+     "role": "user",
+     "username": "ev-engineer"
+    },
+    "after_unknown": {},
+    "before_sensitive": {},
+    "after_sensitive": {}
+   }
+  }
+ ],
+ "prior_state": {
+  "format_version": "1.0",
+  "terraform_version": "1.15.9",
+  "values": {
+   "root_module": {
+    "resources": [
+     {
+      "address": "data.orionbelt_access_review.all",
+      "mode": "data",
+      "type": "orionbelt_access_review",
+      "name": "all",
+      "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+      "schema_version": 0,
+      "values": {
+       "compliant": false,
+       "entries": [
+        {
+         "access_type": "*",
+         "expires_at": null,
+         "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+         "machine_name": "ev-web",
+         "remote_users": [],
+         "source": "role:admin",
+         "user_id": "9626a087-597a-424c-8e5d-a54c8e7327ec",
+         "username": "admin"
+        },
+        {
+         "access_type": "scp",
+         "expires_at": null,
+         "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+         "machine_name": "ev-web",
+         "remote_users": [
+          "deploy"
+         ],
+         "source": "permission:4724e0ff-16d5-46a0-ab2e-eb22502b5fae",
+         "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+         "username": "ev-engineer"
+        },
+        {
+         "access_type": "ssh",
+         "expires_at": "2026-12-01T00:00:00Z",
+         "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+         "machine_name": "ev-web",
+         "remote_users": [
+          "deploy"
+         ],
+         "source": "permission:ff10be4f-c929-42a2-8e4d-d6ea2827d08f",
+         "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+         "username": "ev-engineer"
+        }
+       ],
+       "findings": [
+        {
+         "controls": "SOC 2 CC6.2, SOC 2 CC6.3",
+         "machine_name": "ev-web",
+         "message": "access grants must expire; set expires_at",
+         "rule": "grant-expiry",
+         "username": "ev-engineer"
+        }
+       ],
+       "frameworks": [
+        "soc2"
+       ],
+       "generated_at": "2026-11-02T21:53:36Z",
+       "machine_ids": null
+      }
+     },
+     {
+      "address": "data.orionbelt_compliance_profile.this",
+      "mode": "data",
+      "type": "orionbelt_compliance_profile",
+      "name": "this",
+      "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+      "schema_version": 0,
+      "values": {
+       "frameworks": [
+        "soc2"
+       ],
+       "rules": [
+        {
+         "controls": [
+          "SOC 2 CC6.2",
+          "SOC 2 CC6.3"
+         ],
+         "rule": "grant-expiry",
+         "setting": "every grant sets expires_at"
+        },
+        {
+         "controls": [
+          "SOC 2 CC6.2"
+         ],
+         "rule": "grant-max-duration",
+         "setting": "grants expire within 90d"
+        },
+        {
+         "controls": [
+          "SOC 2 CC6.1"
+         ],
+         "rule": "no-shared-accounts",
+         "setting": "no generic or shared usernames"
+        },
+        {
+         "controls": [
+          "SOC 2 CC6.1"
+         ],
+         "rule": "user-email",
+         "setting": "every user has an email address"
+        },
+        {
+         "controls": [
+          "SOC 2 CC7.2"
+         ],
+         "rule": "retain-evidence",
+         "setting": "agents are archived, never deleted, so recordings are kept"
+        }
+       ]
+      },
+      "sensitive_values": {
+       "frameworks": [
+        false
+       ],
+       "rules": [
+        {
+         "controls": [
+          false,
+          false
+         ]
+        },
+        {
+         "controls": [
+          false
+         ]
+        },
+        {
+         "controls": [
+          false
+         ]
+        },
+        {
+         "controls": [
+          false
+         ]
+        },
+        {
+         "controls": [
+          false
+         ]
+        }
+       ]
+      }
+     },
+     {
+      "address": "orionbelt_agent.web",
+      "mode": "managed",
+      "type": "orionbelt_agent",
+      "name": "web",
+      "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+      "schema_version": 0,
+      "values": {
+       "agent_yaml": "server:\n    host: localhost\n    port: 2222\nagent:\n    name: ev-web\nauth:\n    key_file: /etc/orion-belt/agent_key\n    known_hosts: /etc/orion-belt/known_hosts\n    strict_host_key_checking: ask\n",
+       "archive_on_destroy": true,
+       "cloud_init": null,
+       "gateway_host": "localhost",
+       "gateway_host_key": null,
+       "gateway_port": 2222,
+       "host_ca_public_key": "",
+       "host_certificate": "",
+       "hostname": "10.0.0.9",
+       "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+       "install_version": null,
+       "name": "ev-web",
+       "port": 22,
+       "private_key_command": null,
+       "public_key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICPd9NCnG1LmTq/W+jyDIU9FuxYUZEFjuufGvz56rwd0 ev",
+       "tags": null
+      },
+      "sensitive_values": {
+       "cloud_init": true,
+       "private_key_command": true
+      }
+     },
+     {
+      "address": "orionbelt_machine_access.web",
+      "mode": "managed",
+      "type": "orionbelt_machine_access",
+      "name": "web",
+      "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+      "schema_version": 0,
+      "values": {
+       "grant": [
+        {
+         "access_type": "ssh",
+         "expires_at": "2026-12-01T00:00:00Z",
+         "remote_users": [
+          "deploy"
+         ],
+         "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+        },
+        {
+         "access_type": "scp",
+         "expires_at": null,
+         "remote_users": [
+          "deploy"
+         ],
+         "user_id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae"
+        }
+       ],
+       "id": "a36cc4dc-7136-4389-9e51-be83f75ebd78",
+       "machine_id": "a36cc4dc-7136-4389-9e51-be83f75ebd78"
+      },
+      "sensitive_values": {
+       "grant": [
+        {
+         "remote_users": [
+          false
+         ]
+        },
+        {
+         "remote_users": [
+          false
+         ]
+        }
+       ]
+      },
+      "depends_on": [
+       "orionbelt_agent.web",
+       "orionbelt_user.engineer"
+      ]
+     },
+     {
+      "address": "orionbelt_user.engineer",
+      "mode": "managed",
+      "type": "orionbelt_user",
+      "name": "engineer",
+      "provider_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+      "schema_version": 0,
+      "values": {
+       "email": "engineer@example.com",
+       "id": "121ac85f-aa24-4a71-996f-2cc4fb4d1dae",
+       "mfa_enabled": false,
+       "public_key": null,
+       "role": "user",
+       "username": "ev-engineer"
+      },
+      "sensitive_values": {}
+     }
+    ]
+   }
+  }
+ },
+ "configuration": {
+  "provider_config": {
+   "orionbelt": {
+    "name": "orionbelt",
+    "full_name": "registry.terraform.io/orion-belt-dev/orionbelt",
+    "expressions": {
+     "compliance": {
+      "frameworks": {
+       "constant_value": [
+        "soc2"
+       ]
+      }
+     },
+     "insecure_http": {
+      "constant_value": true
+     },
+     "url": {
+      "constant_value": "http://localhost:8080"
+     }
+    }
+   }
+  },
+  "root_module": {
+   "resources": [
+    {
+     "address": "orionbelt_agent.web",
+     "mode": "managed",
+     "type": "orionbelt_agent",
+     "name": "web",
+     "provider_config_key": "orionbelt",
+     "expressions": {
+      "hostname": {
+       "constant_value": "10.0.0.9"
+      },
+      "name": {
+       "constant_value": "ev-web"
+      },
+      "public_key": {
+       "constant_value": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICPd9NCnG1LmTq/W+jyDIU9FuxYUZEFjuufGvz56rwd0 ev"
+      }
+     },
+     "schema_version": 0
+    },
+    {
+     "address": "orionbelt_machine_access.web",
+     "mode": "managed",
+     "type": "orionbelt_machine_access",
+     "name": "web",
+     "provider_config_key": "orionbelt",
+     "expressions": {
+      "grant": [
+       {
+        "access_type": {
+         "constant_value": "ssh"
+        },
+        "expires_at": {
+         "constant_value": "2026-12-01T00:00:00Z"
+        },
+        "remote_users": {
+         "constant_value": [
+          "deploy"
+         ]
+        },
+        "user_id": {
+         "references": [
+          "orionbelt_user.engineer.id",
+          "orionbelt_user.engineer"
+         ]
+        }
+       }
+      ],
+      "machine_id": {
+       "references": [
+        "orionbelt_agent.web.id",
+        "orionbelt_agent.web"
+       ]
+      }
+     },
+     "schema_version": 0
+    },
+    {
+     "address": "orionbelt_user.engineer",
+     "mode": "managed",
+     "type": "orionbelt_user",
+     "name": "engineer",
+     "provider_config_key": "orionbelt",
+     "expressions": {
+      "email": {
+       "constant_value": "engineer@example.com"
+      },
+      "username": {
+       "constant_value": "ev-engineer"
+      }
+     },
+     "schema_version": 0
+    },
+    {
+     "address": "data.orionbelt_access_review.all",
+     "mode": "data",
+     "type": "orionbelt_access_review",
+     "name": "all",
+     "provider_config_key": "orionbelt",
+     "schema_version": 0
+    },
+    {
+     "address": "data.orionbelt_compliance_profile.this",
+     "mode": "data",
+     "type": "orionbelt_compliance_profile",
+     "name": "this",
+     "provider_config_key": "orionbelt",
+     "schema_version": 0
+    }
+   ]
+  }
+ },
+ "relevant_attributes": [
+  {
+   "resource": "orionbelt_agent.web",
+   "attribute": [
+    "id"
+   ]
+  },
+  {
+   "resource": "orionbelt_user.engineer",
+   "attribute": [
+    "id"
+   ]
+  }
+ ],
+ "timestamp": "2026-11-02T21:53:36Z",
+ "applyable": true,
+ "complete": true,
+ "errored": false
+}

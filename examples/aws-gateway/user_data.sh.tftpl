@@ -1,0 +1,75 @@
+#!/bin/bash
+set -euo pipefail
+umask 077
+
+export AWS_DEFAULT_REGION=${region}
+export DEBIAN_FRONTEND=noninteractive
+
+snap install aws-cli --classic
+
+curl -fsSLo /usr/share/keyrings/orion-belt.gpg https://pkgs.orion-belt.dev/orion-belt.gpg
+echo 'deb [signed-by=/usr/share/keyrings/orion-belt.gpg] https://pkgs.orion-belt.dev stable main' \
+  > /etc/apt/sources.list.d/orion-belt.list
+apt-get update
+apt-get install -y orion-belt
+
+curl -fsSLo /etc/orion-belt/rds-ca.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
+
+secret() {
+  /snap/bin/aws secretsmanager get-secret-value --secret-id "$1" --query SecretString --output text
+}
+
+export DB_PASSWORD="$(secret ${db_secret_arn} | python3 -c 'import json,sys; print(json.load(sys.stdin)["password"])')"
+export JWT_SECRET="$(secret ${jwt_secret_arn})"
+export RECORDING_KEY="$(secret ${recording_secret_arn})"
+
+python3 - <<'PY' > /etc/orion-belt/server.yaml
+import json, os
+from urllib.parse import quote
+
+dsn = "postgres://orionbelt:%s@${db_host}:5432/orionbelt?sslmode=verify-full&sslrootcert=/etc/orion-belt/rds-ca.pem" % quote(os.environ["DB_PASSWORD"], safe="")
+cfg = {
+    "server": {
+        "host": "0.0.0.0",
+        "port": 2222,
+        "api_port": 8080,
+        "ssh_host_key": "/etc/orion-belt/ssh_host_key",
+        "public_url": "${public_url}",
+        "public_ssh_host": "${fqdn}",
+        "public_ssh_port": 2222,
+        "metrics_enabled": False,
+    },
+    "database": {"driver": "postgres", "connection_string": dsn},
+    "auth": {
+        "rebac_enabled": True,
+        "allow_temp_access": True,
+        "jwt_secret": os.environ["JWT_SECRET"],
+        "jwt_expiry_hours": 8,
+        "mfa_required": True,
+        "webauthn": {
+            "enabled": True,
+            "rp_display_name": "Orion Belt",
+            "rp_id": "${fqdn}",
+            "origins": ["${public_url}"],
+        },
+    },
+    "recording": {
+        "enabled": True,
+        "storage_path": "/var/lib/orion-belt/recordings",
+        "retention_days": ${recording_retention_d},
+        "compression": "gzip",
+        "encryption_key": os.environ["RECORDING_KEY"],
+    },
+}
+print(json.dumps(cfg, indent=2))
+PY
+
+chown orionbelt:orionbelt /etc/orion-belt/server.yaml
+chmod 0600 /etc/orion-belt/server.yaml
+unset DB_PASSWORD JWT_SECRET RECORDING_KEY
+
+cat > /etc/cron.d/orion-belt-evidence <<'CRON'
+*/5 * * * * root /snap/bin/aws s3 sync /var/lib/orion-belt/recordings s3://${evidence_bucket}/recordings/ --sse aws:kms --sse-kms-key-id ${kms_key_arn} --only-show-errors
+CRON
+
+systemctl enable --now orion-belt-server
