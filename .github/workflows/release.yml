@@ -40,3 +40,19 @@ jobs:
           subject-path: |
             dist/*.zip
             dist/*_SHA256SUMS
+      # The registries reject any release asset that is not a zip, the
+      # checksums, their signature or the manifest, so the SBOM ships as a
+      # signed attestation on the zips instead of a release file.
+      - name: Generate SBOM
+        id: sbom
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          sbom_path="sbom/terraform-provider-orionbelt_${TAG#v}.spdx.json"
+          mkdir -p sbom
+          syft scan dir:dist --output "spdx-json=$sbom_path"
+          echo "path=$sbom_path" >> "$GITHUB_OUTPUT"
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/*.zip
+          sbom-path: ${{ steps.sbom.outputs.path }}

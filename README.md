@@ -102,7 +102,7 @@ remote user "root" is not allowed; grant a named, least-privileged account
 - Agents verify the gateway by SSH CA or pinned host key.
 - HTTPS only, TLS 1.2+, no redirects, no credentials in the URL.
 - `agent.yaml` and cloud-init are marshalled from structs, not templated.
-- Releases are GPG-signed with an SBOM and build provenance. Actions are pinned by SHA. CI runs CodeQL, govulncheck and Scorecard.
+- Releases are GPG-signed, with an SBOM and build provenance as GitHub attestations (`gh attestation verify`). Actions are pinned by SHA. CI runs CodeQL, govulncheck and Scorecard.
 
 ## Evidence
 
