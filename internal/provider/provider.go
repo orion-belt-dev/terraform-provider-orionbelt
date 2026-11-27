@@ -206,12 +206,12 @@ func buildProfile(ctx context.Context, m *complianceModel) (compliance.Profile, 
 	return compliance.NewProfile(frameworks, overrides)
 }
 
-func listStrings(ctx context.Context, list types.List) ([]string, error) {
-	if list.IsNull() {
+func listStrings(ctx context.Context, values types.List) ([]string, error) {
+	if values.IsNull() {
 		return nil, nil
 	}
 	var out []string
-	if diags := list.ElementsAs(ctx, &out, false); diags.HasError() {
+	if diags := values.ElementsAs(ctx, &out, false); diags.HasError() {
 		return nil, fmt.Errorf("compliance: %v", diags.Errors())
 	}
 	return out, nil
