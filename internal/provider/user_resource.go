@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -22,6 +23,7 @@ var (
 	_ resource.ResourceWithConfigure   = (*userResource)(nil)
 	_ resource.ResourceWithImportState = (*userResource)(nil)
 	_ resource.ResourceWithModifyPlan  = (*userResource)(nil)
+	_ resource.ResourceWithIdentity    = (*userResource)(nil)
 )
 
 type userResource struct {
@@ -35,6 +37,12 @@ type userModel struct {
 	Role       types.String `tfsdk:"role"`
 	PublicKey  types.String `tfsdk:"public_key"`
 	MFAEnabled types.Bool   `tfsdk:"mfa_enabled"`
+}
+
+// userIdentityModel identifies a user by its gateway ID, which never
+// changes; a new username replaces the user.
+type userIdentityModel struct {
+	ID types.String `tfsdk:"id"`
 }
 
 func newUserResource() resource.Resource {
@@ -77,6 +85,14 @@ func (r *userResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 				Description: "Whether the user has enrolled TOTP. Users enrol themselves.",
 				Computed:    true,
 			},
+		},
+	}
+}
+
+func (r *userResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"id": identityschema.StringAttribute{RequiredForImport: true},
 		},
 	}
 }
@@ -131,6 +147,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, userToModel(user, plan))...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, userIdentityModel{ID: types.StringValue(user.ID)})...)
 }
 
 func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -153,6 +170,7 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, userToModel(user, state))...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, userIdentityModel{ID: types.StringValue(user.ID)})...)
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -185,6 +203,7 @@ func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, userToModel(user, plan))...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, userIdentityModel{ID: types.StringValue(user.ID)})...)
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -203,7 +222,7 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughWithIdentity(ctx, path.Root("id"), path.Root("id"), req, resp)
 }
 
 // userToModel copies the API's view into the model. The public key keeps

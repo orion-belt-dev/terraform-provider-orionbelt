@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -131,5 +132,22 @@ func TestWarnIfTruncated(t *testing.T) {
 	warnIfTruncated(&full, "machine", listCap)
 	if full.WarningsCount() != 1 || full.HasError() {
 		t.Fatalf("want one warning at the cap, got %v", full)
+	}
+}
+
+func TestPluralDataSourcesReportGatewayErrors(t *testing.T) {
+	g := newFakeGateway(t)
+	g.failLists = true
+
+	for typ, msg := range map[string]string{"orionbelt_machines": "Cannot list machines", "orionbelt_users": "Cannot list users"} {
+		t.Run(typ, func(t *testing.T) {
+			resource.UnitTest(t, resource.TestCase{
+				ProtoV6ProviderFactories: testProviders,
+				Steps: []resource.TestStep{{
+					Config:      providerBlock(g, "soc2") + `data "` + typ + `" "all" {}`,
+					ExpectError: regexp.MustCompile(msg),
+				}},
+			})
+		})
 	}
 }

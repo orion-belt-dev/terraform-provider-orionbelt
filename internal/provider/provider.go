@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -19,7 +20,10 @@ import (
 	"github.com/orion-belt-dev/terraform-provider-orionbelt/internal/compliance"
 )
 
-var _ provider.Provider = (*orionBeltProvider)(nil)
+var (
+	_ provider.Provider                  = (*orionBeltProvider)(nil)
+	_ provider.ProviderWithListResources = (*orionBeltProvider)(nil)
+)
 
 type orionBeltProvider struct {
 	version string
@@ -128,6 +132,7 @@ func (p *orionBeltProvider) Configure(ctx context.Context, req provider.Configur
 		// report the missing client if they need it during this plan.
 		resp.DataSourceData = &providerData{profile: profile}
 		resp.ResourceData = &providerData{profile: profile}
+		resp.ListResourceData = &providerData{profile: profile}
 		return
 	}
 	if url == "" {
@@ -168,6 +173,7 @@ func (p *orionBeltProvider) Configure(ctx context.Context, req provider.Configur
 	data := &providerData{client: client, profile: profile}
 	resp.DataSourceData = data
 	resp.ResourceData = data
+	resp.ListResourceData = data
 }
 
 // buildProfile reads the compliance block. Every value must be known when
@@ -200,12 +206,12 @@ func buildProfile(ctx context.Context, m *complianceModel) (compliance.Profile, 
 	return compliance.NewProfile(frameworks, overrides)
 }
 
-func listStrings(ctx context.Context, list types.List) ([]string, error) {
-	if list.IsNull() {
+func listStrings(ctx context.Context, values types.List) ([]string, error) {
+	if values.IsNull() {
 		return nil, nil
 	}
 	var out []string
-	if diags := list.ElementsAs(ctx, &out, false); diags.HasError() {
+	if diags := values.ElementsAs(ctx, &out, false); diags.HasError() {
 		return nil, fmt.Errorf("compliance: %v", diags.Errors())
 	}
 	return out, nil
@@ -218,6 +224,13 @@ func (p *orionBeltProvider) Resources(_ context.Context) []func() resource.Resou
 		newMachineAccessResource,
 		newAgentResource,
 		newRiskPolicyResource,
+	}
+}
+
+func (p *orionBeltProvider) ListResources(_ context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		newUserListResource,
+		newMachineAccessListResource,
 	}
 }
 

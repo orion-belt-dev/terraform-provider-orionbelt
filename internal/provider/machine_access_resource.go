@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -25,6 +26,7 @@ var (
 	_ resource.ResourceWithConfigure   = (*machineAccessResource)(nil)
 	_ resource.ResourceWithImportState = (*machineAccessResource)(nil)
 	_ resource.ResourceWithModifyPlan  = (*machineAccessResource)(nil)
+	_ resource.ResourceWithIdentity    = (*machineAccessResource)(nil)
 )
 
 // machineAccessResource owns every standing grant on one machine. Grants
@@ -44,6 +46,12 @@ type grantModel struct {
 	AccessType  types.String `tfsdk:"access_type"`
 	RemoteUsers types.Set    `tfsdk:"remote_users"`
 	ExpiresAt   types.String `tfsdk:"expires_at"`
+}
+
+// machineAccessIdentityModel identifies the resource by its machine, since
+// there is at most one orionbelt_machine_access per machine.
+type machineAccessIdentityModel struct {
+	MachineID types.String `tfsdk:"machine_id"`
 }
 
 func newMachineAccessResource() resource.Resource {
@@ -90,6 +98,14 @@ func (r *machineAccessResource) Schema(_ context.Context, _ resource.SchemaReque
 					},
 				},
 			},
+		},
+	}
+}
+
+func (r *machineAccessResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"machine_id": identityschema.StringAttribute{RequiredForImport: true},
 		},
 	}
 }
@@ -145,6 +161,7 @@ func (r *machineAccessResource) Create(ctx context.Context, req resource.CreateR
 		resp.Diagnostics.AddError("Cannot list machine permissions", err.Error())
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, machineAccessIdentityModel{MachineID: plan.MachineID})...)
 }
 
 func (r *machineAccessResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -166,6 +183,7 @@ func (r *machineAccessResource) Read(ctx context.Context, req resource.ReadReque
 		return
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, state)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, machineAccessIdentityModel{MachineID: state.MachineID})...)
 }
 
 func (r *machineAccessResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -185,6 +203,7 @@ func (r *machineAccessResource) Update(ctx context.Context, req resource.UpdateR
 		resp.Diagnostics.AddError("Cannot list machine permissions", err.Error())
 	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
+	resp.Diagnostics.Append(resp.Identity.Set(ctx, machineAccessIdentityModel{MachineID: plan.MachineID})...)
 }
 
 func (r *machineAccessResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -200,9 +219,18 @@ func (r *machineAccessResource) Delete(ctx context.Context, req resource.DeleteR
 	r.apply(ctx, state, &resp.Diagnostics)
 }
 
+// ImportState takes the machine ID, either as the import ID or as the
+// machine_id identity attribute.
 func (r *machineAccessResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("machine_id"), req.ID)...)
+	machineID := types.StringValue(req.ID)
+	if req.ID == "" {
+		resp.Diagnostics.Append(req.Identity.GetAttribute(ctx, path.Root("machine_id"), &machineID)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), machineID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("machine_id"), machineID)...)
 }
 
 // apply makes the machine's grants match want: it updates grants that
