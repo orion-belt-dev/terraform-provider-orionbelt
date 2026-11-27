@@ -56,4 +56,4 @@ release:
     name: terraform-provider-orionbelt
 
 changelog:
-  disable: true
+  use: github-native

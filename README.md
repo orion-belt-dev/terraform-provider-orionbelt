@@ -126,6 +126,7 @@ remote user "root" is not allowed; grant a named, least-privileged account
 make build
 make test      # real terraform binary against an in-memory gateway
 make lint
+make docs      # regenerate docs/; CI fails when it differs from the schema
 TF_ACC=1 ORIONBELT_URL=... ORIONBELT_API_KEY=... make testacc
 ```
 
