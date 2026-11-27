@@ -79,6 +79,8 @@ resource "orionbelt_machine_access" "web" {
 | `data.orionbelt_access_review` | Effective access and compliance findings. |
 | `data.orionbelt_compliance_profile` | Rules in force and their controls. |
 
+To bring an existing gateway under Terraform, `terraform query` (Terraform 1.14+) finds users and machines with the `orionbelt_user` and `orionbelt_machine_access` list resources and writes import blocks for them. Both resources can also be imported by identity (`id` and `machine_id`).
+
 ## Compliance
 
 | Rule | SOC 2 | ISO 27001 | PCI DSS 4.0 |
