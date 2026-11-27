@@ -225,7 +225,9 @@ func (p *orionBeltProvider) DataSources(_ context.Context) []func() datasource.D
 	return []func() datasource.DataSource{
 		newGatewayDataSource,
 		newMachineDataSource,
+		newMachinesDataSource,
 		newUserDataSource,
+		newUsersDataSource,
 		newAccessReviewDataSource,
 		newComplianceProfileDataSource,
 	}

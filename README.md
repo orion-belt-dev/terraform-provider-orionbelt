@@ -75,6 +75,7 @@ resource "orionbelt_machine_access" "web" {
 | `orionbelt_risk_policy` | Access request auto-approval and escalation. |
 | `data.orionbelt_gateway` | Gateway info and SSH CA keys. |
 | `data.orionbelt_machine`, `data.orionbelt_user` | Lookups by name. |
+| `data.orionbelt_machines`, `data.orionbelt_users` | Filtered lists for `for_each`: by name prefix, tags, active, or role. |
 | `data.orionbelt_access_review` | Effective access and compliance findings. |
 | `data.orionbelt_compliance_profile` | Rules in force and their controls. |
 

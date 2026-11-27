@@ -459,6 +459,24 @@ func (g *fakeGateway) addMachine(name string) string {
 	return m.ID
 }
 
+// addMachineWithTags inserts a machine with tags and an active flag.
+func (g *fakeGateway) addMachineWithTags(name string, active bool, tags map[string]string) string {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	m := &sdk.Machine{ID: g.id("machine"), Name: name, Hostname: name, Port: 22, IsActive: active, Tags: tags}
+	g.machines[m.ID] = m
+	return m.ID
+}
+
+// addUser inserts a user directly, as if created in the console.
+func (g *fakeGateway) addUser(username, role string) string {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	u := &sdk.User{ID: g.id("user"), Username: username, Email: username + "@example.com", Role: role}
+	g.users[u.ID] = u
+	return u.ID
+}
+
 func (g *fakeGateway) permissionCount(machineID string) int {
 	g.mu.Lock()
 	defer g.mu.Unlock()
