@@ -29,6 +29,7 @@ type fakeGateway struct {
 	riskPolicy  sdk.RiskPolicy
 	hostCA      string
 	deletes     []string
+	failLists   bool // list endpoints answer 500
 }
 
 func newFakeGateway(t *testing.T) *fakeGateway {
@@ -118,6 +119,10 @@ func (g *fakeGateway) trustedCA(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (g *fakeGateway) listUsers(w http.ResponseWriter, _ *http.Request) {
+	if g.failLists {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "database unavailable"})
+		return
+	}
 	out := []sdk.User{}
 	for _, u := range g.users {
 		out = append(out, *u)
@@ -210,6 +215,10 @@ func (g *fakeGateway) registerAgent(w http.ResponseWriter, r *http.Request) {
 }
 
 func (g *fakeGateway) listMachines(w http.ResponseWriter, _ *http.Request) {
+	if g.failLists {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "database unavailable"})
+		return
+	}
 	out := []sdk.Machine{}
 	for _, m := range g.machines {
 		out = append(out, *m)
