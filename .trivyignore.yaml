@@ -1,0 +1,13 @@
+# Each entry is explained in SECURITY-EXCEPTIONS.md.
+misconfigurations:
+  - id: AVD-AWS-0104
+    paths:
+      - examples/aws-gateway/security.tf
+      - examples/aws-agents/agents.tf
+    expired_at: 2027-02-25
+    statement: Example egress to package repositories and AWS APIs; see SECURITY-EXCEPTIONS.md
+  - id: AVD-AWS-0053
+    paths:
+      - examples/aws-gateway/nlb.tf
+    expired_at: 2027-02-25
+    statement: The example gateway's NLB is reached by users and agents; see SECURITY-EXCEPTIONS.md
