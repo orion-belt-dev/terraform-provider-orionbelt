@@ -9,7 +9,7 @@ variable "gateway_url" {
 }
 
 variable "gateway_ssh_cidrs" {
-  description = "Addresses of the gateway's SSH listener the agents may dial."
+  description = "Addresses of the gateway's SSH listener the agents may dial. The default allows any address; set it to the gateway load balancer's addresses."
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
